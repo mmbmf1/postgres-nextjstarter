@@ -9,7 +9,23 @@ export default async function Table() {
   let startTime = Date.now()
 
   try {
-    data = await sql`SELECT * FROM users`
+    data = await sql`
+    SELECT
+      users.id AS user_id,
+      users.name,
+      users.email,
+      users.image,
+      users."createdAt",
+      count(posts)::int as post_counts,
+      count(likes)::int  AS post_likes
+    FROM
+      users
+      LEFT JOIN posts ON posts.user_id = users.id
+      LEFT JOIN likes ON likes.post_id = posts.id
+    GROUP BY
+      users.id
+    ORDER by users.id
+    `
   } catch (e: any) {
     if (e.message === `relation "users" does not exist`) {
       console.log(
@@ -23,6 +39,9 @@ export default async function Table() {
       throw e
     }
   }
+
+
+  console.log('data', data.rows)
 
 
   const { rows: users } = data
@@ -56,6 +75,7 @@ export default async function Table() {
               <div className="space-y-1">
                 <p className="font-medium leading-none">{user.name}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>
+                <p className="text-sm text-gray-500">posts: {user.post_counts}</p>
               </div>
             </div>
             <p className="text-sm text-gray-500">{timeAgo(user.createdAt)}</p>
