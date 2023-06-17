@@ -24,6 +24,7 @@ export default async function Table() {
     }
   }
 
+
   const { rows: users } = data
   const duration = Date.now() - startTime
 
